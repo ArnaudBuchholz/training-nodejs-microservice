@@ -15,7 +15,12 @@ let hookProcessEnd = true
 async function queryRegistry (method, endpoint, data) {
   for await (const serviceRegistryUrl of serviceRegistryUrls) {
     try {
-      return await axios[method](`http://${serviceRegistryUrl}/${endpoint}`, data)
+      return await axios({
+        method,
+        url: `http://${serviceRegistryUrl}/${endpoint}`,
+        data,
+        validateStatus: status => (status >= 200 && status < 300) || status === 404
+      })
     } catch (reason) {
       console.error(`${method.toUpperCase()} /${endpoint} on registry ${serviceRegistryUrl} failed`, reason.toString())
     }
@@ -31,6 +36,9 @@ module.exports = {
    */
   async getLocationOf (name) {
     const response = await queryRegistry('get', name)
+    if (response.status === 404) {
+      throw new Error(`Service ${name} not registered`)
+    }
     return response.data
   },
 
