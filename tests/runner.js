@@ -8,17 +8,17 @@ const services = []
 module.exports = {
   start (serviceName, environementVariables) {
     const id = uuid()
-    const service = fork(join(__dirname, 'serviceWrapper.js'), [serviceName, id], {
+    const service = fork(join(__dirname, `../src/services/${serviceName}.js`), {
       cwd: join(__dirname, '../'),
-      end: environementVariables,
+      env: environementVariables,
       stdio: ['ignore', 'ignore', 'ignore', 'ipc']
     })
     service.id = uuid()
+    service.name = serviceName
     services.push(service)
     let started
     const onMessage = message => {
-      if (message.ready === id) {
-        service.port = message.port
+      if (message === 'ready') {
         started(service)
         service.off('message', onMessage)
       }
@@ -29,25 +29,29 @@ module.exports = {
     })
   },
 
-  stop (selector) {
-    if (selector === undefined) {
-      return Promise.all(services.map(service => this.stop(service.id)))
+  stop (service) {
+    if (service === undefined) {
+      return Promise.all(services
+        .map(this.stop)
+      )
     }
-    const service = services.filter(item => item.id === selector)[0]
-    if (service) {
-      if (service.killed) {
-        return
-      }
-      let stopped
-      const stopping = new Promise(resolve => {
-        stopped = resolve
-      })
-      service.on('close', () => {
-        stopped()
-      })
-      service.kill(os.constants.signals.SIGINT)
-      return stopping
+    if (typeof service === 'string') {
+      return Promise.all(services
+        .filter(item => item.id === service || item.name === service)
+        .map(this.stop)
+      )
     }
-    return Promise.reject(new Error('Unknown service'))
+    if (service.killed) {
+      return
+    }
+    let stopped
+    const stopping = new Promise(resolve => {
+      stopped = resolve
+    })
+    service.on('close', () => {
+      stopped()
+    })
+    service.kill(os.constants.signals.SIGINT)
+    return stopping
   }
 }
