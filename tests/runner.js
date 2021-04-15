@@ -7,7 +7,6 @@ const services = []
 
 module.exports = {
   start (serviceName, environementVariables) {
-    const id = uuid()
     const service = fork(join(__dirname, `../src/services/${serviceName}.js`), {
       cwd: join(__dirname, '../'),
       env: environementVariables,
