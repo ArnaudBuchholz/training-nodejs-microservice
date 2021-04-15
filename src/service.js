@@ -6,14 +6,16 @@ module.exports = async configure => {
 
   app.use(morgan('tiny'))
 
-  const { name, port } = (await configure(app) || {})
+  const { name } = (await configure(app) || {})
 
-  const server = app.listen(port || 0, () => {
+  const server = app.listen(process.env.SERVICE_PORT || 0, () => {
     const allocatedPort = server.address().port
+    console.log(`Listening on port ${allocatedPort}`)
     if (name) {
-      const registry = require('./registry')
-      console.log(`Service ${name} listening on port ${allocatedPort}`)
-      registry.register(name, allocatedPort)
+      require('./registry').register(name, allocatedPort)
+    }
+    if (process.send) {
+      process.send('ready')
     }
   })
 }
