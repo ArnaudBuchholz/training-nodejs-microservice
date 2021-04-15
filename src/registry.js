@@ -1,12 +1,27 @@
 const axios = require('axios')
 const localhost = '127.0.0.1'
 const currentHost = process.env.CURRENT_HOST || localhost
-const serviceRegistryHost = process.env.SERVICE_REGISTRY_HOST || localhost
-const serviceRegistryPort = process.env.SERVICE_REGISTRY_PORT || 8081
-const serviceRegistryUrl = `http://${serviceRegistryHost}:${serviceRegistryPort}`
+const serviceRegistryUrls = (process.env.SERVICE_REGISTRY_LIST || 'localhost:8081')
+  .split(';')
+  .map(value => value.trim())
+  .filter(value => !!value)
+
+console.log('Service registry URLs : ', serviceRegistryUrls)
 
 let serviceId
 let intervalId
+let hookProcessEnd = true
+
+async function queryRegistry (method, endpoint, data) {
+  for await (const serviceRegistryUrl of serviceRegistryUrls) {
+    try {
+      return await axios[method](`http://${serviceRegistryUrl}/${endpoint}`, data)
+    } catch (reason) {
+      console.error(`${method.toUpperCase()} /${endpoint} on registry ${serviceRegistryUrl} failed`, reason.toString())
+    }
+  }
+  throw new Error('No registry service available')
+}
 
 module.exports = {
   /**
@@ -15,7 +30,7 @@ module.exports = {
    * @return {object} Location of the service (host and port)
    */
   async getLocationOf (name) {
-    const response = await axios.get(`${serviceRegistryUrl}/${name}`)
+    const response = await queryRegistry('get', name)
     return response.data
   },
 
@@ -28,18 +43,39 @@ module.exports = {
    */
   async register (name, port, host = currentHost) {
     try {
-      const response = await axios.post(`${serviceRegistryUrl}/register`, { name, port, host })
-      serviceId = response.data
+      const response = await queryRegistry('post', 'register', { name, port, host })
+      const { id, heartbeat } = response.data
+      serviceId = id
       intervalId = setInterval(() => {
-        axios.post(`${serviceRegistryUrl}/${serviceId}`)
-          .catch(reason => console.error(`Unable to send a heartbeat to registry : ${reason}`))
-      }, 5000)
-      process.on('SIGINT', async () => {
-        await this.unregister()
-        process.exit(0)
-      })
+        queryRegistry('post', serviceId)
+          .catch(reason => {
+            if (reason.response && reason.response.status === 404) {
+              console.error('Registration lost, registering again...')
+              clearInterval(intervalId)
+              serviceId = undefined
+              this.register(name, port, host)
+            } else {
+              console.error(`Unable to send a heartbeat to registry : ${reason}`)
+            }
+          })
+      }, heartbeat)
+      if (hookProcessEnd) {
+        hookProcessEnd = false
+        const processEnd = async () => {
+          await this.unregister()
+          process.exit(0)
+        }
+        process.on('SIGINT', processEnd)
+        process.on('message', msg => {
+          if (msg === 'shutdown') {
+            processEnd()
+          }
+        })
+      }
+      console.log(`${name} registered with ID : ${serviceId}`)
     } catch (reason) {
-      console.error(`Unable to register ${name}`, reason.toString())
+      console.error(`Unable to register ${name}, retrying in 1s...`, reason.toString())
+      setTimeout(() => this.register(name, port, host), 1000)
     }
   },
 
@@ -47,7 +83,8 @@ module.exports = {
   async unregister () {
     if (serviceId) {
       clearInterval(intervalId)
-      await axios.delete(`${serviceRegistryUrl}/${serviceId}`)
+      queryRegistry('delete', serviceId)
+        .then(() => console.log(`Unregistered service ${serviceId}`))
         .catch(reason => console.error(`Unable to unregister service from registry : ${reason}`))
       serviceId = undefined
     }

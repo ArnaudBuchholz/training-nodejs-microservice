@@ -1,22 +1,19 @@
-const express = require('express')
-const registry = require('../registry')
+require('../service')(async app => {
+  app.disable('etag')
 
-const app = express()
+  const name = process.env.TESTED_BY_NAME || 'anonymous'
 
-app.disable('etag')
+  app.get('/test', (req, res) => {
+    const echo = req.headers['x-echo']
+    if (echo) {
+      res.setHeader('x-echo', echo)
+    }
+    res.setHeader('x-service-version', 1)
+    res.setHeader('x-service-timestamp', new Date().toISOString())
+    res.send(`TESTED by ${name}`)
+  })
 
-app.get('/test', (req, res) => {
-  const echo = req.headers['x-echo']
-  if (echo) {
-    res.setHeader('x-echo', echo)
+  return {
+    name: 'test'
   }
-  res.setHeader('x-service-version', 1)
-  res.setHeader('x-service-timestamp', new Date().toISOString())
-  res.send('TESTED')
-})
-
-const service = app.listen(0, () => {
-  const port = service.address().port
-  console.log(`Test service listening on port ${port}`)
-  registry.register('test', port)
 })
