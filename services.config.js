@@ -2,7 +2,8 @@ const { join } = require('path')
 
 const base = {
   watch: false,
-  shutdown_with_message: true
+  shutdown_with_message: true,
+  wait_ready: true
 }
 
 module.exports = {
