@@ -23,6 +23,7 @@ module.exports = {
       SERVICE_REGISTRY_LIST: 'localhost:8082',
       SERVICE_PORT: 8081
     }
+    /*
   }, {
     ...base,
     name: 'registry',
@@ -31,14 +32,16 @@ module.exports = {
       SERVICE_REGISTRY_LIST: 'localhost:8081',
       SERVICE_PORT: 8082
     }
+*/
   }, {
     ...base,
     name: 'www',
     script: 'src/services/test.js',
     env: {
-      SERVICE_REGISTRY_LIST: 'localhost:8081;localhost:8082',
+      // SERVICE_REGISTRY_LIST: 'localhost:8081;localhost:8082',
       WWW_ROOT: join(__dirname, 'src/www')
     }
+    /*
   }, {
     ...base,
     name: 'www',
@@ -47,12 +50,13 @@ module.exports = {
       SERVICE_REGISTRY_LIST: 'localhost:8082;localhost:8081',
       WWW_ROOT: join(__dirname, 'src/www')
     }
+*/
   }, {
     ...base,
     name: 'test_A',
     script: 'src/services/test.js',
     env: {
-      SERVICE_REGISTRY_LIST: 'localhost:8081;localhost:8082',
+      // SERVICE_REGISTRY_LIST: 'localhost:8081;localhost:8082',
       TESTED_BY_NAME: 'A'
     }
   }, {
@@ -60,7 +64,7 @@ module.exports = {
     name: 'test_B',
     script: 'src/services/test.js',
     env: {
-      SERVICE_REGISTRY_LIST: 'localhost:8082;localhost:8081',
+      // SERVICE_REGISTRY_LIST: 'localhost:8082;localhost:8081',
       TESTED_BY_NAME: 'B'
     }
   }]
