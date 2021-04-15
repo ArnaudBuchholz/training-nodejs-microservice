@@ -1,0 +1,48 @@
+{
+  "name": "training-nodejs-microservice",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "lint": "standard --fix",
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ArnaudBuchholz/training-nodejs-microservice.git"
+  },
+  "keywords": [
+    "nodejs",
+    "microservice",
+    "training"
+  ],
+  "author": "Arnaud Buchholz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ArnaudBuchholz/training-nodejs-microservice/issues"
+  },
+  "homepage": "https://github.com/ArnaudBuchholz/training-nodejs-microservice#readme",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "express": "^4.17.1",
+    "morgan": "^1.10.0",
+    "uuid": "^3.4.0"
+  },
+  "devDependencies": {
+    "mocha": "^8.3.2",
+    "pm2": "^4.5.6",
+    "standard": "^16.0.3"
+  },
+  "standard": {
+    "env": [
+      "mocha",
+      "node"
+    ]
+  },
+  "mocha": {
+    "diff": false,
+    "spec": [
+      "tests/mocha/**/*.test.js"
+    ]
+  }
+}
