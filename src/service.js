@@ -6,9 +6,9 @@ module.exports = async configure => {
 
   app.use(morgan('tiny'))
 
-  const { name } = (await configure(app) || {})
+  const { name, port } = (await configure(app, express) || {})
 
-  const server = app.listen(process.env.SERVICE_PORT || 0, () => {
+  const server = app.listen(port || process.env.SERVICE_PORT || 0, () => {
     const allocatedPort = server.address().port
     console.log(`Listening on port ${allocatedPort}`)
     if (name) {
