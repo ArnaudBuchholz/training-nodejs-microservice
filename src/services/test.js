@@ -10,7 +10,7 @@ require('../service')(async app => {
     }
     res.setHeader('x-service-version', 1)
     res.setHeader('x-service-timestamp', new Date().toISOString())
-    res.send(`TESTED by ${name}`)
+    res.send(`Tested by ${name}`)
   })
 
   return {
