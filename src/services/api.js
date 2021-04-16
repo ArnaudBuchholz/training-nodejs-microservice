@@ -1,12 +1,22 @@
 require('../service')(async app => {
   const http = require('http')
   const registry = require('../registry')
+  const { v4: uuid } = require('uuid')
 
   function fwd (service, url) {
     return async function (req, res) {
       try {
         const { host, port } = registry.getLocationOf(service)
-        const serviceRequest = http.request({ port, host, method: req.method, path: url || req.url })
+        const serviceRequest = http.request({
+          port,
+          host,
+          method: req.method,
+          path: url || req.url,
+          headers: {
+            ...req.headers,
+            'x-request-id': uuid()
+          }
+        })
         serviceRequest.on('response', serviceResponse => {
           const { statusCode, headers } = serviceResponse
           if ((statusCode >= 200 && statusCode < 300) || [301, 302, 303, 304, 401, 403, 404].includes(statusCode)) {
