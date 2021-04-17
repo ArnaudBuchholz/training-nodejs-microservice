@@ -6,7 +6,8 @@ require('../service')(async app => {
   function fwd (service, url) {
     return async function (req, res) {
       try {
-        const { host, port } = registry.getLocationOf(service)
+        const { host, port } = await registry.getLocationOf(service)
+        const requestId = uuid()
         const serviceRequest = http.request({
           port,
           host,
@@ -14,13 +15,16 @@ require('../service')(async app => {
           path: url || req.url,
           headers: {
             ...req.headers,
-            'x-request-id': uuid()
+            'x-request-id': requestId
           }
         })
         serviceRequest.on('response', serviceResponse => {
           const { statusCode, headers } = serviceResponse
           if ((statusCode >= 200 && statusCode < 300) || [301, 302, 303, 304, 401, 403, 404].includes(statusCode)) {
-            res.writeHead(statusCode, headers)
+            res.writeHead(statusCode, {
+              ...headers,
+              'x-request-id': requestId
+            })
             serviceResponse.pipe(res)
           } else {
             console.error(`Unexpected service status code : ${statusCode}`)
