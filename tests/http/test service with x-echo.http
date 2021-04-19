@@ -1,0 +1,4 @@
+# To be used with https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+
+GET http://localhost:52591/test 
+x-echo: a value
