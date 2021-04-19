@@ -1,12 +1,12 @@
 const assert = require('assert')
 const axios = require('axios')
-const runner = require('../../runner')
+const runner = require('../../../runner')
 
 describe('registry service', () => {
   before(async () => {
     await runner.start('registry', {
       SERVICE_PORT: 8081,
-      HEARTBEAT_DELAY: 1000
+      HEARTBEAT_DELAY: 500
     })
   })
 
@@ -40,13 +40,15 @@ describe('registry service', () => {
   describe('registering a test service', () => {
     let test1InstanceId
 
-    before(async () => {
+    async function registerTest1 () {
       const response = await axios.post('http://localhost:8081/register', { name: 'test', host: '192.168.0.1', port: 1234 })
       assert.strictEqual(response.status, 200)
       assert.strictEqual(typeof response.data, 'object')
-      assert.strictEqual(response.data.heartbeat, 1000)
+      assert.strictEqual(response.data.heartbeat, 500)
       test1InstanceId = response.data.id
-    })
+    }
+
+    before(registerTest1)
 
     it('returns the list of services', () => servicesRegistered([{ id: test1InstanceId }]))
 
@@ -66,8 +68,6 @@ describe('registry service', () => {
       before(async () => {
         const response = await axios.post('http://localhost:8081/register', { name: 'test', host: '192.168.0.2', port: 5678 })
         assert.strictEqual(response.status, 200)
-        assert.strictEqual(typeof response.data, 'object')
-        assert.strictEqual(response.data.heartbeat, 1000)
         test2InstanceId = response.data.id
       })
 
@@ -88,6 +88,31 @@ describe('registry service', () => {
         const response = await axios.delete(`http://localhost:8081/${test2InstanceId}`)
         assert.strictEqual(response.status, 204)
         await servicesRegistered([{ id: test1InstanceId }])
+      })
+    })
+
+    describe('hearbeat', () => {
+      it('confirms with 200', async () => {
+        const response = await axios.post(`http://localhost:8081/${test1InstanceId}`)
+        assert.strictEqual(response.status, 200)
+      })
+
+      describe('skipping', function () {
+        this.timeout(2000)
+
+        it('is considered unregistered if missing a heartbeat', async () => {
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          const response = await axios.get('http://localhost:8081/test', {
+            validateStatus: () => true
+          })
+          assert.strictEqual(response.status, 404)
+        })
+
+        it('can be registered again', async () => {
+          await registerTest1()
+          const response = await axios.get('http://localhost:8081/test')
+          assert.strictEqual(response.status, 200)
+        })
       })
     })
 
