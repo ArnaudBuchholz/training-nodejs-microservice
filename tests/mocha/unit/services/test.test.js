@@ -1,6 +1,6 @@
 const assert = require('assert')
 const axios = require('axios')
-const runner = require('../../runner')
+const runner = require('../../../runner')
 
 describe('test service', () => {
   before(async () => {
