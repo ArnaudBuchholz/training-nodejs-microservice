@@ -50,6 +50,18 @@ require('../service')(async (app, express) => {
     res.sendStatus(404)
   })
 
+  setInterval(() => {
+    const now = Date.now()
+    const indexes = []
+    services.forEach((service, index) => {
+      const refTime = service.lastHeartbeat || service.registered
+      if (now - refTime > settings.heartbeat) {
+        indexes.unshift(index)
+      }
+    })
+    indexes.forEach(index => services.splice(index, 1))
+  }, settings.heartbeat)
+
   return {
     port: 8081
   }
