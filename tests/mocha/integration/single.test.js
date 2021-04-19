@@ -3,7 +3,8 @@ const axios = require('axios')
 const runner = require('../../runner')
 
 describe('api -> registry -> test', () => {
-  before(async () => {
+  before(async function () {
+    this.timeout(5000)
     await runner.start('api', {
       SERVICE_PORT: 8080,
       SERVICE_REGISTRY_LIST: 'localhost:8081'
