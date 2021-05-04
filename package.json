@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "lint": "standard --fix",
-    "test": "mocha"
+    "test": "standard --fix && mocha",
+    "cover": "nyc mocha",
+    "cover:report": "nyc report --reporter=lcov --reporter=html",
+    "lint": "standard --fix"
   },
   "repository": {
     "type": "git",
@@ -30,6 +32,8 @@
   },
   "devDependencies": {
     "mocha": "^8.3.2",
+    "mock-require": "^3.0.3",
+    "nyc": "^15.1.0",
     "pm2": "^4.5.6",
     "standard": "^16.0.3"
   },
@@ -43,6 +47,13 @@
     "diff": false,
     "spec": [
       "tests/mocha/**/*.test.js"
+    ]
+  },
+  "nyc": {
+    "all": true,
+    "exclude": [
+      "tests/**",
+      "steps/**"
     ]
   }
 }
