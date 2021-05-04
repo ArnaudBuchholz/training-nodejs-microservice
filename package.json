@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "standard --fix",
+    "build": "tsc --build",
     "test": "mocha"
   },
   "repository": {
@@ -29,6 +30,9 @@
     "uuid": "^3.4.0"
   },
   "devDependencies": {
+    "@types/express": "^4.17.11",
+    "@types/node": "^15.0.1",
+    "@types/uuid": "^8.3.0",
     "mocha": "^8.3.2",
     "pm2": "^4.5.6",
     "standard": "^16.0.3"
