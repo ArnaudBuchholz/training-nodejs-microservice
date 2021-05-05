@@ -1,18 +1,20 @@
 import { Service } from './Service'
 import { RegisteredService } from './RegisteredService'
 import { IRegistry } from './IRegistry'
-import { service, get, post, del } from '../base/service'
+import { service, get, post, del } from '../core/@service'
+
+const idEndPoint = /\/\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b/
 
 @service()
 export class Registry implements IRegistry {
   #services : Array<RegisteredService> = []
 
-  @get('/')
+  @get('/$')
   getServices () {
     return this.#services
   }
 
-  @get('/:name')
+  @get(/\/(\w+)/)
   get (name: string) : RegisteredService | null {
     const registeredService = this.#services.find(item => item.name === name)
     if (registeredService) {
@@ -30,7 +32,7 @@ export class Registry implements IRegistry {
     return registeredService
   }
 
-  @post('/:id')
+  @post(idEndPoint)
   heartbeat (serviceId: string) : boolean {
     const registeredService = this.#services.find(service => service.id === serviceId)
     if (registeredService) {
@@ -40,7 +42,7 @@ export class Registry implements IRegistry {
     return false      
   }
 
-  @del('/:id')
+  @del(idEndPoint)
   unregister (serviceId: string) : boolean {
     const index = this.#services.findIndex(service => service.id === serviceId)
     if (index !== undefined) {
