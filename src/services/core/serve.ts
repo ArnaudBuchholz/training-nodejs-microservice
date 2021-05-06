@@ -37,12 +37,13 @@ const mappers = {
         let argBody: object | undefined = undefined
         if (mapping.BodyType) {
           const reqBody = JSON.parse(await body(req))
-console.log('>>', reqBody)
           argBody = new mapping.BodyType(reqBody)
-console.log('<<', argBody)
         }
         const result: any = await serviceImpl[mapping.propertyKey].call(serviceImpl, ...args, argBody)
-        if (!result) {
+        if (result === false) {
+          return 404
+        }
+        if (!result || result === true) {
           return 204
         }
         sendJSON(res, result)
@@ -52,7 +53,7 @@ console.log('<<', argBody)
 
   DELETE: (serviceImpl: any, mapping: Mapping) => {
     return {
-      method: 'GET',
+      method: 'DELETE',
       match: mapping.url,
       custom: async (req: IncomingMessage, res: ServerResponse, ...args: Array<string>) => {
         if (await serviceImpl[mapping.propertyKey].call(serviceImpl, ...args)) {
