@@ -1,4 +1,4 @@
-@registryPort = 61840
+@registryPort = 62905
 
 GET http://localhost:{{registryPort}}/ HTTP/1.1
 
@@ -9,6 +9,17 @@ content-type: application/json
 
 {
     "name": "sample",
+    "host": "localhost",
+    "port": 8080
+}
+
+###
+
+POST http://localhost:{{registryPort}}/register HTTP/1.1
+content-type: application/json
+
+{
+    "name2": "sample",
     "host": "localhost",
     "port": 8080
 }
