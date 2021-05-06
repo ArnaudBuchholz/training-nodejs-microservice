@@ -1,4 +1,4 @@
-@registryPort = 51270
+@registryPort = 61840
 
 GET http://localhost:{{registryPort}}/ HTTP/1.1
 
@@ -15,6 +15,14 @@ content-type: application/json
 
 ###
 
-@service = e5be69b8-d03a-4b60-8c8a-7c9df59447cb
+GET http://localhost:{{registryPort}}/sample HTTP/1.1
+
+###
+
+@service = 27a5e014-ebc4-4f18-9f6a-72f4eba6bc6e
 
 POST http://localhost:{{registryPort}}/{{service}} HTTP/1.1
+
+###
+
+DELETE http://localhost:{{registryPort}}/{{service}} HTTP/1.1
