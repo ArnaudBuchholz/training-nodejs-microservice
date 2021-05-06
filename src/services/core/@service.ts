@@ -1,15 +1,12 @@
 export const $mappings = Symbol('service:mappings')
 
-export enum Method {
-  GET,
-  POST,
-  DELETE
-}
+export type Method = 'GET' | 'POST' | 'DELETE'
 
 export type Mapping = {
   method: Method,
   url: string | RegExp,
-  propertyKey: string
+  propertyKey: string,
+  BodyType?: (new (body: any) => object) | undefined
 }
 
 function addMapping (target: any, mapping: Mapping) {
@@ -21,19 +18,19 @@ function addMapping (target: any, mapping: Mapping) {
 
 export function get (url: string | RegExp) {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    addMapping(target, { method: Method.GET, url, propertyKey })
+    addMapping(target, { method: 'GET', url, propertyKey })
   }
 }
 
-export function post (url: string | RegExp, BodyType: Function | undefined = undefined) {
+export function post (url: string | RegExp, BodyType: (new (body: any) => object) | undefined = undefined) {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    addMapping(target, { method: Method.POST, url, propertyKey })
+    addMapping(target, { method: 'POST', url, propertyKey, BodyType })
   }
 }
 
 export function del (url: string | RegExp) {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    addMapping(target, { method: Method.DELETE, url, propertyKey })
+    addMapping(target, { method: 'DELETE', url, propertyKey })
   }
 }
 
