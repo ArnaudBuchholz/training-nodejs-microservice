@@ -24,7 +24,7 @@ export class Registry implements IRegistry {
     return null
   }
 
-  @post('/register')
+  @post('/register', Service)
   register (service: Service) : RegisteredService {
     const registeredService = new RegisteredService(service)
     registeredService.registered = new Date()
