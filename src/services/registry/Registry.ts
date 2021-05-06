@@ -3,7 +3,7 @@ import { RegisteredService } from './RegisteredService'
 import { IRegistry } from './IRegistry'
 import { service, get, post, del } from '../core/@service'
 
-const idEndPoint = /\/\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b/
+const idEndPoint = /\/(\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b)/
 
 @service()
 export class Registry implements IRegistry {
@@ -34,17 +34,17 @@ export class Registry implements IRegistry {
 
   @post(idEndPoint)
   heartbeat (serviceId: string) : boolean {
-    const registeredService = this.#services.find(service => service.id === serviceId)
+    const registeredService = this.#services.find(service => service.id === serviceId.toLowerCase())
     if (registeredService) {
       registeredService.heartbeat = new Date()
       return true
     }
-    return false      
+    return false
   }
 
   @del(idEndPoint)
   unregister (serviceId: string) : boolean {
-    const index = this.#services.findIndex(service => service.id === serviceId)
+    const index = this.#services.findIndex(service => service.id === serviceId.toLowerCase())
     if (index !== undefined) {
       const registeredService = this.#services[index]
       this.#services.splice(index, 1)
