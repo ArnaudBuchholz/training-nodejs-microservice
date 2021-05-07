@@ -45,7 +45,7 @@ export class Registry implements IRegistry {
   @del(idEndPoint)
   unregister (serviceId: string) : boolean {
     const index = this._services.findIndex(service => service.id === serviceId.toLowerCase())
-    if (index !== undefined) {
+    if (index !== -1) {
       const registeredService = this._services[index]
       this._services.splice(index, 1)
       return true
