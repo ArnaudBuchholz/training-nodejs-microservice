@@ -1,11 +1,11 @@
 import { join } from 'path'
 import { $options, $mappings, Mapping } from './@service'
 import { body, check, log, serve } from 'reserve'
-import { IncomingMessage, ServerResponse } from "node:http"
+import * as http from 'http'
 
 const serviceModule = join(process.cwd(), process.argv[2])
 
-const sendJSON = (res: ServerResponse, obj: object) => {
+const sendJSON = (res: http.ServerResponse, obj: object) => {
   const jsonString: string = JSON.stringify(obj)
   res.writeHead(200, {
     'content-type': 'application/json',
@@ -19,7 +19,7 @@ const mappers = {
     return {
       method: 'GET',
       match: mapping.url,
-      custom: async (req: IncomingMessage, res: ServerResponse, ...args: Array<string>) => {
+      custom: async (req: http.IncomingMessage, res: http.ServerResponse, ...args: Array<string>) => {
         const result: any = await serviceImpl[mapping.propertyKey].call(serviceImpl, ...args)
         if (null === result) {
           return 404
@@ -33,7 +33,7 @@ const mappers = {
     return {
       method: 'POST',
       match: mapping.url,
-      custom: async (req: IncomingMessage, res: ServerResponse, ...args: Array<string>) => {
+      custom: async (req: http.IncomingMessage, res: http.ServerResponse, ...args: Array<string>) => {
         let argBody: object | undefined = undefined
         if (mapping.BodyType) {
           const reqBody = JSON.parse(await body(req))
@@ -55,7 +55,7 @@ const mappers = {
     return {
       method: 'DELETE',
       match: mapping.url,
-      custom: async (req: IncomingMessage, res: ServerResponse, ...args: Array<string>) => {
+      custom: async (req: http.IncomingMessage, res: http.ServerResponse, ...args: Array<string>) => {
         if (await serviceImpl[mapping.propertyKey].call(serviceImpl, ...args)) {
           return 204
         }
