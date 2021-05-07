@@ -7,16 +7,16 @@ const idEndPoint = /\/(\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-
 
 @service()
 export class Registry implements IRegistry {
-  #services : Array<RegisteredService> = []
+  private _services : Array<RegisteredService> = []
 
   @get('/$')
   getServices () {
-    return this.#services
+    return this._services
   }
 
   @get(/\/(\w+)/)
   get (name: string) : RegisteredService | null {
-    const registeredService = this.#services.find(item => item.name === name)
+    const registeredService = this._services.find(item => item.name === name)
     if (registeredService) {
       registeredService.lastAccess = new Date()
       return registeredService
@@ -28,13 +28,13 @@ export class Registry implements IRegistry {
   register (service: Service) : RegisteredService {
     const registeredService = new RegisteredService(service)
     registeredService.registered = new Date()
-    this.#services.push(registeredService)
+    this._services.push(registeredService)
     return registeredService
   }
 
   @post(idEndPoint)
   heartbeat (serviceId: string) : boolean {
-    const registeredService = this.#services.find(service => service.id === serviceId.toLowerCase())
+    const registeredService = this._services.find(service => service.id === serviceId.toLowerCase())
     if (registeredService) {
       registeredService.heartbeat = new Date()
       return true
@@ -44,10 +44,10 @@ export class Registry implements IRegistry {
 
   @del(idEndPoint)
   unregister (serviceId: string) : boolean {
-    const index = this.#services.findIndex(service => service.id === serviceId.toLowerCase())
+    const index = this._services.findIndex(service => service.id === serviceId.toLowerCase())
     if (index !== undefined) {
-      const registeredService = this.#services[index]
-      this.#services.splice(index, 1)
+      const registeredService = this._services[index]
+      this._services.splice(index, 1)
       return true
     }
     return false
