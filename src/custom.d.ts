@@ -5,4 +5,11 @@ declare namespace REserve {
     port: number,
     mappings: Array<any>
   }
-}  
+}
+
+declare namespace Express {
+  interface Request {
+      body?: object,
+      params?: any
+  }
+}
